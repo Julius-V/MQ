@@ -1,22 +1,49 @@
 library(MASS)
 library(caTools)
 
+#' Random sampling of a truncated random variable
+#' 
+#' Random sampling of a truncated random variable with parameters `p` and `M`
+#' @param n number of observations
+#' @param p probabiliy of success
+#' @param M positive integer, maximal possible length, truncation parameter
+#' @return a vector of random draws of length `n`
+#' @author Julius Vainora
 rtgeom <- function(n, p, M) {
   pr <- c(p * (1 - p)^(0:(M - 2)), (1 - p)^(M - 1))
   rdraws <- runif(n)
   findInterval(rdraws, cumsum(c(0, pr)))
 }
 
+#' Probability mass function of a trunctated random variable
+#' 
+#' Probability mass function of a trunctated random variable with parameters `p` and `M`
+#' 
+#' @param x vector of quantities
+#' @param p probability of success
+#' @param M positive integer, maximal possible length, truncation parameter
+#' @return a vector of probability mass values
+#' @author Julius Vainora
 dtgeom <- function(x, p, M) {
   pr <- c(p * (1 - p)^(0:(M - 2)), (1 - p)^(M - 1))
   pr[x]
 }
 
+#' Sligthly faster version of findInterval
 mi <- function(x, vec)
   .Internal(findInterval(vec, x, FALSE, FALSE))
 
+#' A function to compute a quantile when everything else is given
 getQ <- function(s, h, hf = floor(h)) s[hf] + (h - hf) * (s[pmin(h + 1, length(s))] - s[hf])
 
+#' Moving quantiles
+#' 
+#' Computing moving quantiles of probability `p` and window `M`
+#' @param x numeric vector whose moving quantiles are wanted
+#' @param p a vector of probabilities between 0 and 1
+#' @param M window size for moving quantiles to compute
+#' @return a matrix of `length(p)` columns and `length(x)-M` rows
+#' @author Julius Vainora
 turboQ <- function(x, p, M) {
   N <- length(x)
   h <- (M - 1) * p + 1
@@ -260,7 +287,6 @@ plot.mq <- function(m, ids = 1:ncol(m$Q), ...) {
 
 
 
-
 ##' Simulate from a Vector Moving Quantile model
 ##'
 ##' Simulate from a Vector Moving Quantile model
@@ -414,8 +440,6 @@ mq.irf <- function(x, ortho = TRUE, n.ahead = 10, cumulative = FALSE, shock) {
   impp <- t(matrix(rapply(apply(phi[, nm], 1, split, rep(1:R, each = K)), sum), R, R))
   equa <- solve(diag(R) - impt - impp, const)
   out <- matrix(rep(equa, each = (l + n.ahead) * l), nrow = l + n.ahead, ncol = R * l)
-  # thetos antras skaicius - kintamasis
-  # phi pirmas skaicius - kintamasis
   out[l, 1 + 0:(R - 1) * l] <- shock + out[l, 1 + 0:(R - 1) * l]
   cvec <- numeric(R * l)
   cvec[1 + 0:(R - 1) * l] <- const
