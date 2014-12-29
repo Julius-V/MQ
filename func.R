@@ -211,6 +211,74 @@ mq.sim <- function(n, M, pr, const = 0, phi = 0, theta, type = 7,
   out[-1:-n.start]
 }
 
+graphTest <- function(cnts, vls, M, maxLs, lower = 0.1, upper = 0.9, n.points = 100, boot.iter = 300, alpha, model) {
+  # Choosing only full length regimes and no annomalies
+  idx <- maxLs == M & cnts <= M & cnts >= 1
+  
+  x2 <- cnts[idx]
+  x1 <- vls[idx]
+  x2 <- ordered(x2)
+  # Estimating joint density
+  dn <- npudens(~ x1 + x2)
+  # A function to estimate parameter p at a given level
+  npr <- function(x) {
+    w <- predict(dn, newdata = data.frame(x1 = x, x2 = ordered(1:max(x2))))
+    m <- sum(1:max(as.numeric(x2)) * w) / sum(w)
+    momEst(m, M)
+  }
+  # Range of levels of interest
+  from <- quantile(x1, lower)
+  to <- quantile(x1, upper)
+  
+  # Bootstrap to get a confidence set
+  bts1 <- replicate({
+    # Sampling
+    idx <- sample(length(x1), replace = TRUE)
+    aux1 <- x1[idx]
+    aux2 <- x2[idx]
+    # Estimating a joint density with a given bandwidth (otherwise would take forever)
+    dn0 <- npudens(~ aux1 + aux2, bandwidth.compute = FALSE, bws = dn$bw)
+    # Again a function to estimate parameter p at a given level
+    npr0 <- function(x) {
+      w <- predict(dn0, newdata = data.frame(aux1 = x, aux2 = ordered(unique(as.numeric(x2)[idx]))))
+      m <- sum(unique(as.numeric(x2)[idx]) * w) / sum(w)
+      momEst(m, M)
+    }
+    # Computing it over the range of interest
+    sapply(seq(from, to, length = n.points), npr0)}, n = boot.iter)
+  
+  # Obtaining a curve of p's
+  zht <- sapply(seq(from, to, length = n.points), npr)
+  ## Part II - using model
+  eps <- resid(model)
+  # Transforming the range of interest
+  theta <- model$coef
+  from <- from * (1 - theta)
+  to <- to * (1 - theta)
+  # Bootstrap to get a confidence set
+  bts2 <- replicate({
+    # Sampling
+    sm <- sample(eps, replace = TRUE)
+    # Obtaining p's    
+    1 - ecdf(sm)(seq(from, to, length = n.points))}, n = boot.iter)  
+  # Another curve of p's
+  pn <- 1 - ecdf(eps)(seq(from, to, length = n.points))
+  
+  ## Part III - results
+  # Transforming the range of interest back to original units
+  xs <- seq(1 / (1 - theta) * from, 1 / (1 - theta) * to, length = n.points)
+  data.frame(x = xs, y = c(zht, 
+                           apply(bts1, 1, quantile, alpha / 2),
+                           apply(bts1, 1, quantile, 1 - alpha / 2), 
+                           pn,
+                           apply(bts2, 1, quantile, alpha / 2),
+                           apply(bts2, 1, quantile, 1 - alpha / 2)),
+             confint = rep(c(0, 1, 1, 0, 1, 1), each = n.points),
+             type = rep(c("Data", "Model"), each = n.points * 3), 
+             sep = rep(1:6, each = n.points))
+}
+
+
 HQC <- function(m) {
   k <- length(m$coeff)
   res <- resid(m)
@@ -410,6 +478,12 @@ vmq <- function(x, K = 0, M, pr = 0:4 / 4, const = TRUE, type = 7, cov = NULL, .
   out
 }
 
+library(ggplot2)
+thm <-  theme(panel.grid.major = element_line(color = "grey95"),
+              panel.grid.minor = element_line(color = "grey98"),
+              legend.text = element_text(size = 11),
+              legend.title = element_text(size = 11),
+              axis.title.y = element_text(size = 12))
 
 mq.irf <- function(x, ortho = TRUE, n.ahead = 10, cumulative = FALSE, shock) {
   pr <- x$pr
@@ -480,8 +554,8 @@ vmqTest.vmq <- function(m) {
 
 
 mq.sim.aux <- function(n, M, pr, const = 0, phi = 0, theta, type = 7, 
-                   rand.gen = rnorm, innov = rand.gen(n, ...), n.start = 5000, 
-                   start.innov = rand.gen(n.start, ...), ...) {
+                       rand.gen = rnorm, innov = rand.gen(n, ...), n.start = 5000, 
+                       start.innov = rand.gen(n.start, ...), ...) {
   if(missing(n) | !is.numeric(n) | length(n) > 1 || n < 1)
     stop("'n' has to be positive integer")
   if(missing(M) | !is.numeric(M) | length(M) > 1 || M < 1)
@@ -535,10 +609,3 @@ qacf <- function(x, y = NULL, conf.level = 0.95, title = "") {
     thm + theme_bw() + ylab(NULL) + scale_fill_grey("") + theme(legend.position = 'none')
   p
 }
-
-library(ggplot2)
-thm <-  theme(panel.grid.major = element_line(color = "grey95"),
-              panel.grid.minor = element_line(color = "grey98"),
-              legend.text = element_text(size = 11),
-              legend.title = element_text(size = 11),
-              axis.title.y = element_text(size = 12))
