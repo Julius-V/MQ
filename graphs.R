@@ -2,7 +2,7 @@ rm(list = ls())
 source("func.R")
 library(ggplot2)
 
-# Fixed M - Figure 7
+# Fixed M - Figure C.1
 M <- 20
 data <- data.frame(y = c(dtgeom(1:M, 0.01, M), dtgeom(1:M, 0.03, M), 
                          dtgeom(1:M, 0.05, M), dtgeom(1:M, 0.07, M)), 
@@ -12,7 +12,7 @@ ggplot(data, aes(y = y, x = x, group = p, color = p, linetype = p)) +
   thm + scale_linetype("Parameter p") + scale_color_grey("Parameter p")
 
 
-# Fixed p - Figure 8
+# Fixed p - Figure C.2
 p <- 0.03
 data <- data.frame(y = c(dtgeom(1:10, p, 10), dtgeom(1:20, p, 20), dtgeom(1:30, p, 30),
                          dtgeom(1:40, p, 40)), x = c(1:10, 1:20, 1:30, 1:40), 
@@ -22,14 +22,14 @@ ggplot(data, aes(y = y, x = x, group = M, color = M, linetype = M)) +
   thm + scale_linetype("Parameter M") + scale_color_grey("Parameter M")
 
 
-# Structural breaks example - Figure 9
+# Structural breaks example - Figure C.3
 set.seed(123)
 x <- mq.sim(5000, M = 50, theta = 0.95, pr = 1, n.start = 5000)
 plotData <- data.frame(x = 1:5000, y = x)
 ggplot(plotData, aes(x, y)) + geom_line() + theme_bw() + thm + ylab(NULL) + xlab("Time")
 
 
-# Moving maximum processes, \xi* densities and their ACF's - Figures 10, 11
+# Moving maximum processes, \xi* densities and their ACF's - Figures C.4, C.5
 N <- 50000
 Ms <- c(40, 40, 5, 5)
 thetas <- c(0.95, 0.1, 0.95, 0.1)
@@ -60,7 +60,7 @@ do.call(grid.arrange, c(plots[c(1,4,2,5,3,6)], list(ncol = 2)))
 do.call(grid.arrange, c(plots[c(7,10,8,11,9,12)], list(ncol = 2)))
 
 
-## Empirical ACF vs Approximated ACF - Figure 12
+## Empirical ACF vs Approximated ACF - Figure C.6
 set.seed(123)
 # True parameters theta
 thetas <- c(0.95, 0.95)

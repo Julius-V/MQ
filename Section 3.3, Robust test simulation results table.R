@@ -2,6 +2,7 @@ rm(list = ls())
 load("data/robustTestSim.RData")
 ### Constructing and printing tables from the MC simulation of the
 ### conditional-heteroskedasticity-robust test for the MQ model
+### Tables B.1 and B.2
 
 alphas <- c(0.99, 0.95, 0.9)
 

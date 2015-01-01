@@ -2,6 +2,7 @@ rm(list = ls())
 load("data/vmqTestSim.RData")
 ### Constructing and printing tables from the MC simulation of the
 ### VMQ specification test
+### Tables D.1 and D.2
 
 alphas <- c(0.99, 0.95, 0.9)
 

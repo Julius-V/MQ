@@ -20,6 +20,7 @@ x <- getSymbols("BAC", auto.assign = FALSE, from = "2011-10-17", to = "2014-07-3
 # Transforming to absolute returns and setting intercept equal to zero (skipping computations)
 tr <- function(x) abs(diff(log(x))) - 0.006868 / (1 - 0.256746)
 y <- tr(x)[is.finite(tr(x))]
+# Figure 5.1
 do.call(grid.arrange, list(qplot(x = index(y), y = as.numeric(y), geom = "line") + thm + theme_bw() +
                              xlab("Time") + ylab(NULL), qacf(as.numeric(y)), nrow = 1))
 
@@ -28,6 +29,7 @@ mod <- mq(as.numeric(y), pr = 1, M = M, K = 0, const = FALSE)
 theta <- mod$coef
 eps <- resid(mod)
 
+# Figure E.1
 do.call(grid.arrange, list(qplot(x = index(y[-1:-6]), y = eps, geom = "line") + thm + 
                              theme_bw() + xlab("Time") + ylab(NULL), qacf(eps), nrow = 1))
 
@@ -52,7 +54,7 @@ idx <- maxLs >= 1 & maxLs <= M & cnts <= M
 
 
 ## Results
-# Table 1
+# Table 5.1
 xtable(addmargins(table(cnts[idx], maxLs[idx])))
 
 # Tests
@@ -63,7 +65,7 @@ mqTest(mod, rob = TRUE)
 f <- var(cnts[idx]) * (1 + 2 * sum(acf(cnts[idx], plot = FALSE, lag.max = 2)$acf[-1]))
 1/(sqrt(f)*sqrt(length(cnts[idx]))) * sum(cnts[idx] - means[idx])
 
-### Graphical test - Figure 3
+### Graphical test - Figure 5.2
 set.seed(123)
 plotData <- graphTest(cnts, vls, M, maxLs, boot.iter = bit, alpha = 0.05, model = mod)
 
@@ -73,7 +75,7 @@ ggplot(plotData, aes(x = x, y = y, color = type, linetype = factor(confint), gro
   xlab(expression(paste("Level ", x[t]))) + ylab("Structural break probability") + 
   theme(legend.position = 'bottom')
 
-# Figure 4
+# Figure 5.3
 library(plot3D)
 mm <- mesh(1:M, seq(min(y), max(y), length = 30))
 xx <- mm$x

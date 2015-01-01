@@ -34,12 +34,12 @@ for(i in 1:3)
     }
 
 
-# Table 5
+# Table C.1
 tmp <- apply(ar, c(3, 1, 4), function(x) x[4] / x[3])
 fin <- cbind(tmp[, , 1], tmp[, , 2], tmp[, , 3])
 cat(paste(apply(round(fin, 2), 1, paste, collapse = " & "), collapse = "\n"))
 
-# Table 6
+# Table C.2
 tmp <- apply(ar, c(3, 1, 4), function(x) {
   cn <- ps[which.min(abs(x[1] - ps))]
   abs(x[1] - cn) / abs(x[2] - cn)

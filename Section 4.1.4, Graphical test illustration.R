@@ -1,6 +1,7 @@
 rm(list = ls())
 source("func.R")
 ### The code for the illustration of the graphical test
+### Figure 4.1
 
 library(ggplot2)
 library(np)
