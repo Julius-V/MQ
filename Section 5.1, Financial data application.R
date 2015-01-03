@@ -13,7 +13,7 @@ library(quantmod)
 # Fixed parameter M
 M <- 6
 # Bootstrap iterations
-bit  <- 400
+bit  <- 500
 
 # Data
 x <- getSymbols("BAC", auto.assign = FALSE, from = "2011-10-17", to = "2014-07-30")[, 6]

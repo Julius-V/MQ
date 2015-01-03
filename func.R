@@ -1,9 +1,9 @@
 library(MASS)
 library(caTools)
 
-#' Random sampling of a truncated random variable
+#' Random sampling from a truncated random variable
 #' 
-#' Random sampling of a truncated random variable with parameters `p` and `M`
+#' Random sampling from a truncated random variable with parameters `p` and `M`
 #' @param n number of observations
 #' @param p probabiliy of success
 #' @param M positive integer, maximal possible length, truncation parameter
@@ -58,9 +58,9 @@ turboQ <- function(x, p, M) {
   qs
 }
 
-##' Fitting Moving Quantile Models
+##' Fitting Moving Quantiles model
 ##'
-##' `mq` estimates Moving Quantile regression using OLS and is a wrapper for \code{lm}.
+##' `mq` estimates Moving Quantiles regression using OLS and is a wrapper for \code{lm}.
 ##'
 ##' @param x numeric vector.
 ##' @param K nonnegative integer, the order of autoregressive term of the model.
@@ -163,9 +163,9 @@ mqTest.mq <- function(m, rob = FALSE) {
 }
 
 
-##' Simulate from a Moving Quantile model
+##' Simulate a Moving Quantiles model
 ##'
-##' Simulate from a Moving Quantile model
+##' Simulate a Moving Quantiles model
 ##'
 ##' @param n positive integer, length of output series.
 ##' @param M positive integer, window size used to compute quantiles.
@@ -355,9 +355,9 @@ plot.mq <- function(m, ids = 1:ncol(m$Q), ...) {
 
 
 
-##' Simulate from a Vector Moving Quantile model
+##' Simulate a Vector Moving Quantiles model
 ##'
-##' Simulate from a Vector Moving Quantile model
+##' Simulate a Vector Moving Quantiles model
 ##'
 ##' @param n positive integer, length of output series.
 ##' @param M positive integer, window size used to compute quantiles.
@@ -408,9 +408,9 @@ vmq.sim <- function(n, M, pr, const = 0, phi = matrix(0, nrow = nrow(theta)), th
 
 
 
-##' Fitting Vector Moving Quantile Models
+##' Fitting Vector Moving Quantiles model
 ##'
-##' `mq` estimates Vector Moving Quantile regression using OLS and is a wrapper for \code{lm}.
+##' `mq` estimates Vector Moving Quantiles regression using OLS and is a wrapper for \code{lm}.
 ##'
 ##' @param x numeric matrix
 ##' @param K nonnegative integer, the order of autoregressive term of the model.
