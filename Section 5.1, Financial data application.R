@@ -44,11 +44,6 @@ vls <- unique(qs)
 # Maximal lengths
 maxLs <- sapply(vls, function(v)
   M - (which.min(abs(qs - v)) - which.min(abs(tail(y, length(qs)) - v)))) + 1
-# Estimates of p at each regime level
-ps <- 1 - ecdf(eps)((1 - theta) * vls)
-# Corresponding mean regime lengths
-meanEst <- function(p, M) (2 * (1 - (1 - p)^M * (1 + p * M)) / p^2 - (1 - (1 - p)^M) / p)
-means <- meanEst(ps, maxLs)
 # Ignoring annomalies
 idx <- maxLs >= 1 & maxLs <= M & cnts <= M
 
@@ -61,9 +56,19 @@ xtable(addmargins(table(cnts[idx], maxLs[idx])))
 mqTest(mod)
 mqTest(mod, rob = TRUE)
 
-# Another test
-f <- var(cnts[idx]) * (1 + 2 * sum(acf(cnts[idx], plot = FALSE, lag.max = 2)$acf[-1]))
-1/(sqrt(f)*sqrt(length(cnts[idx]))) * sum(cnts[idx] - means[idx])
+# Asymptotic test
+library(fGarch)
+(pars <- sstdFit(eps)$estim)
+distr <- function(n) rsstd(n, pars[1], pars[2], pars[3], pars[4])
+set.seed(123)
+asyTest(y, M, distr = distr, N = 5e5)
+# [1] 0.4503901
+plotData <- data.frame(x = c(eps, distr(2e6)),
+                       id = rep(c("Residuals", "Skew normal"), c(length(eps), 2e6)))
+ggplot(plotData, aes(x = x, fill = id)) + geom_density(alpha = 0.15) + 
+  theme_bw() + thm + xlab(NULL) + ylab(NULL) + xlim(c(min(eps), max(eps))) +
+  theme(legend.position = "bottom") + scale_fill_grey("")
+
 
 ### Graphical test - Figure 5.2
 set.seed(123)
