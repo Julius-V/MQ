@@ -10,6 +10,8 @@ library(caTools)
 #' @return a vector of random draws of length `n`
 #' @author Julius Vainora
 rtgeom <- function(n, p, M) {
+  if(M == 1)
+    return(1)
   pr <- c(p * (1 - p)^(0:(M - 2)), (1 - p)^(M - 1))
   rdraws <- runif(n)
   findInterval(rdraws, cumsum(c(0, pr)))
@@ -608,4 +610,28 @@ qacf <- function(x, y = NULL, conf.level = 0.95, title = "") {
     xlab(NULL) + geom_hline(yintercept = 0, color = "grey", size = 0.3) + 
     thm + theme_bw() + ylab(NULL) + scale_fill_grey("") + theme(legend.position = 'none')
   p
+}
+
+
+
+asyTest <- function(x, M, N = 100000, distr = rnorm, n.start = 5000) {
+  mod <- mq(x, M = M, pr = 1, const = FALSE, K = 0)
+  theta <- coef(mod)
+  if(abs(theta) > 1)
+    return(0)
+  qs <- turboQ(x, 1, M)[,1]
+  cnts <- tapply(qs, qs, length)[as.character(unique(qs))]
+  idx <- cnts <= M
+  LL1 <- rep(cnts[idx], cnts[idx])
+  
+  y <- mq.sim(N, M = M, pr = 1, theta = theta, rand.gen = distr, n.start = n.start)
+  qs <- turboQ(y, 1, M)[,1]
+  cnts <- tapply(qs, qs, length)[as.character(unique(qs))]
+  idx <- cnts <= M
+  LL2 <- rep(cnts[idx], cnts[idx])
+  mm <- mean(LL2)
+  sigma <- (2 * (sum(acf(LL2, lag.max = 2 * M, plot = FALSE)$acf) - 1) + 1) * var(LL2)
+  
+  stat <- sum(LL1 - mm) / sqrt(length(LL1) * sigma)
+  2 * (1 - pnorm(abs(stat)))
 }
