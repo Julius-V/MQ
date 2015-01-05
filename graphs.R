@@ -98,7 +98,7 @@ for(n in 1:2) {
 do.call(grid.arrange, c(plots, nrow = 1))
 
 
-### Graphical test under H_1 - Figure C.7
+### Graphical test under H_1 - Figure C.8
 load("data/r1.Rdata")
 phis <- c(0.1, 0.5, 0.95)
 df <- resultsH1
@@ -115,25 +115,17 @@ ggplot(plotData, aes(x = x, y = values, color = ind, type = ind, group = ind)) +
 
 
 
-### Graphical test under H_0 - Figure C.8
+### Graphical test under H_0 - Figure C.7
 load("data/r0.Rdata")
-ns <- c(1000, 2000)
 thetas <- c(0.1, 0.5, 0.95)
-plots <- list()
-for(i in 1:2)
-  for(j in 1:3) {
-    df <- resultsH0[, i, j, ]
-    x <- seq(0, 1, length = 400)
-    df <- apply(df, 2, function(y)sapply(x, function(x) sum(abs(y) > qnorm(1 - x/2)) / length(y)))
-    plotData <- stack(data.frame(df))
-    plotData[, 2] <- factor(rep(c("M = 5", "M = 25", "M = 50"), each = nrow(df)),
-                            levels = c("M = 5", "M = 25", "M = 50")[3:1])
-    plotData$x <- x
-    plots <- c(plots, list(ggplot(plotData, aes(x = x, y = values, color = ind, type = ind, group = ind)) + 
-                             geom_line() + theme_bw() + thm + geom_abline(intercept = 0, slope = 1) +
-                             xlab(expression(alpha)) + ylab(NULL) +
-                             theme(legend.position = "bottom") + 
-                             ggtitle(bquote(paste("N = ", .(ns[i]), ", ", theta, " = ", .(thetas[j])))) +
-                             scale_linetype("") + scale_color_grey("")))
-  }
-do.call(grid.arrange, plots)
+df <- resultsH0
+x <- seq(0, 1, length = 400)
+df <- apply(df, 2, function(y) sapply(x, function(z) sum(y < z) / length(y)))
+plotData <- stack(data.frame(df))
+plotData[, 2] <- factor(rep(1:3, each = nrow(df)))
+plotData$x <- x
+vec <- c(bquote(phi == .(thetas[1])),bquote(phi == .(thetas[2])),bquote(phi == .(thetas[3])))
+ggplot(plotData, aes(x = x, y = values, color = ind, type = ind, group = ind)) + 
+  geom_line() + theme_bw() + thm + geom_abline(intercept = 0, slope = 1) +
+  xlab(expression(alpha)) + ylab(NULL) + theme(legend.position = "bottom") + 
+  scale_linetype("", labels = vec) + scale_color_grey("", labels = vec)
